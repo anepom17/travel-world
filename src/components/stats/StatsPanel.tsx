@@ -2,15 +2,7 @@ import { Globe, MapPin, Calendar, Plane } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-
-const CONTINENT_LABELS: Record<string, string> = {
-  Africa: "Африка",
-  Asia: "Азия",
-  Europe: "Европа",
-  "North America": "Северная Америка",
-  "South America": "Южная Америка",
-  Oceania: "Океания",
-};
+import { CONTINENT_LABELS } from "@/lib/constants/countries";
 
 export interface ContinentStat {
   name: string;

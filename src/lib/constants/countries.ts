@@ -217,6 +217,36 @@ export const CONTINENTS = [
 
 export type Continent = (typeof CONTINENTS)[number];
 
+/** Russian labels for continents (map filters, stats) */
+export const CONTINENT_LABELS: Record<string, string> = {
+  Africa: "Африка",
+  Asia: "Азия",
+  Europe: "Европа",
+  "North America": "Северная Америка",
+  "South America": "Южная Америка",
+  Oceania: "Океания",
+};
+
+/** Map region: world view or a single continent */
+export type MapRegion = "World" | Continent;
+
+/** Viewport preset: center [lon, lat] and zoom for ZoomableGroup */
+export interface MapViewportPreset {
+  center: [number, number];
+  zoom: number;
+}
+
+/** Viewport presets for map region filter (center and zoom per region) */
+export const MAP_VIEWPORT_PRESETS: Record<MapRegion, MapViewportPreset> = {
+  World: { center: [0, 20], zoom: 1 },
+  Europe: { center: [15, 54], zoom: 2.5 },
+  Asia: { center: [100, 34], zoom: 2 },
+  Africa: { center: [20, 0], zoom: 2.2 },
+  "North America": { center: [-100, 45], zoom: 2 },
+  "South America": { center: [-60, -15], zoom: 2.2 },
+  Oceania: { center: [135, -25], zoom: 2.5 },
+};
+
 /** Lookup: alpha-2 code → Country object */
 export const COUNTRY_BY_CODE: Record<string, Country> = Object.fromEntries(
   COUNTRIES.map((c) => [c.code, c])

@@ -8,8 +8,16 @@ import {
   ZoomableGroup,
 } from "react-simple-maps";
 
+import { Button } from "@/components/ui/button";
 import { NUMERIC_TO_ALPHA2 } from "@/lib/constants/country-codes";
-import { COUNTRY_BY_CODE, TOTAL_COUNTRIES } from "@/lib/constants/countries";
+import {
+  CONTINENT_LABELS,
+  COUNTRY_BY_CODE,
+  CONTINENTS,
+  MAP_VIEWPORT_PRESETS,
+  TOTAL_COUNTRIES,
+  type MapRegion,
+} from "@/lib/constants/countries";
 
 const GEO_URL = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
 
@@ -28,11 +36,14 @@ interface WorldMapProps {
 }
 
 function WorldMapInner({ visitedCountries, onCountryClick }: WorldMapProps) {
+  const [selectedRegion, setSelectedRegion] = useState<MapRegion>("World");
   const [tooltip, setTooltip] = useState<{
     name: string;
     x: number;
     y: number;
   } | null>(null);
+
+  const viewport = MAP_VIEWPORT_PRESETS[selectedRegion];
 
   const handleMouseEnter = useCallback(
     (
@@ -62,6 +73,27 @@ function WorldMapInner({ visitedCountries, onCountryClick }: WorldMapProps) {
 
   return (
     <div className="relative w-full">
+      {/* Region filter buttons */}
+      <div className="mb-3 flex flex-wrap justify-center gap-1.5">
+        <Button
+          size="sm"
+          variant={selectedRegion === "World" ? "default" : "outline"}
+          onClick={() => setSelectedRegion("World")}
+        >
+          Весь мир
+        </Button>
+        {CONTINENTS.map((continent) => (
+          <Button
+            key={continent}
+            size="sm"
+            variant={selectedRegion === continent ? "default" : "outline"}
+            onClick={() => setSelectedRegion(continent)}
+          >
+            {CONTINENT_LABELS[continent] ?? continent}
+          </Button>
+        ))}
+      </div>
+
       {/* Map — responsive height, smooth transitions */}
       <div className="min-h-[280px] w-full overflow-hidden rounded-xl border border-border/80 bg-card shadow-sm transition-shadow duration-300 hover:shadow-md sm:min-h-[360px] lg:min-h-[420px]">
         <ComposableMap
@@ -75,6 +107,9 @@ function WorldMapInner({ visitedCountries, onCountryClick }: WorldMapProps) {
           style={{ width: "100%", height: "auto" }}
         >
           <ZoomableGroup
+            key={selectedRegion}
+            center={viewport.center}
+            zoom={viewport.zoom}
             minZoom={1}
             maxZoom={6}
             translateExtent={[
