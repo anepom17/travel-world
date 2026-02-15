@@ -49,6 +49,13 @@ export type AiPortrait = {
   generated_at: string;
 };
 
+export type VisitedCountry = {
+  id: string;
+  user_id: string;
+  country_code: string;
+  created_at: string;
+};
+
 // =============================================
 // Insert / Update helpers
 // =============================================
@@ -59,6 +66,8 @@ export type TripUpdate = Partial<Omit<Trip, "id" | "user_id" | "created_at" | "u
 export type PhotoInsert = Omit<Photo, "id" | "created_at">;
 
 export type AiPortraitInsert = Omit<AiPortrait, "id" | "generated_at">;
+
+export type VisitedCountryInsert = Omit<VisitedCountry, "id" | "created_at">;
 
 // =============================================
 // Supabase generated Database type
@@ -128,6 +137,23 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "ai_portraits_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      visited_countries: {
+        Row: VisitedCountry;
+        Insert: VisitedCountryInsert & {
+          id?: string;
+          created_at?: string;
+        };
+        Update: Partial<Omit<VisitedCountry, "id" | "user_id" | "created_at">>;
+        Relationships: [
+          {
+            foreignKeyName: "visited_countries_user_id_fkey";
             columns: ["user_id"];
             isOneToOne: false;
             referencedRelation: "profiles";

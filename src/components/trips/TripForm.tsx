@@ -40,16 +40,18 @@ const MOOD_OPTIONS: { value: TripMood; label: string }[] = [
 interface TripFormProps {
   /** If provided, we're editing an existing trip */
   trip?: Trip;
+  /** Pre-select a country (e.g. from query param ?country=FR) */
+  defaultCountryCode?: string;
 }
 
-export function TripForm({ trip }: TripFormProps) {
+export function TripForm({ trip, defaultCountryCode }: TripFormProps) {
   const isEdit = !!trip;
   const [isPending, startTransition] = useTransition();
 
   // Country search
   const [countrySearch, setCountrySearch] = useState("");
   const [selectedCountryCode, setSelectedCountryCode] = useState(
-    trip?.country_code ?? ""
+    trip?.country_code ?? defaultCountryCode ?? ""
   );
   const countrySearchInputRef = useRef<HTMLInputElement>(null);
 

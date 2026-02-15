@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Plus, Sparkles } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/server";
+import { COUNTRY_BY_CODE } from "@/lib/constants/countries";
 import type { Trip } from "@/types";
 import { Button } from "@/components/ui/button";
 import { TripCard } from "@/components/trips/TripCard";
@@ -17,12 +18,18 @@ export default async function TripsPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { data: trips, error } = await supabase
-    .from("trips")
-    .select("*")
-    .eq("user_id", user!.id)
-    .order("started_at", { ascending: false })
-    .returns<Trip[]>();
+  const [{ data: trips, error }, { data: visitedRows }] = await Promise.all([
+    supabase
+      .from("trips")
+      .select("*")
+      .eq("user_id", user!.id)
+      .order("started_at", { ascending: false })
+      .returns<Trip[]>(),
+    supabase
+      .from("visited_countries")
+      .select("country_code")
+      .eq("user_id", user!.id),
+  ]);
 
   if (error) {
     return (
@@ -40,6 +47,19 @@ export default async function TripsPage() {
     );
   }
 
+  // Countries with trip details
+  const tripCountryCodes = new Set((trips ?? []).map((t) => t.country_code));
+
+  // Countries marked visited but without any trip details
+  const suggestedCountries = (visitedRows ?? [])
+    .map((r) => r.country_code)
+    .filter((code) => !tripCountryCodes.has(code))
+    .map((code) => ({
+      code,
+      name: COUNTRY_BY_CODE[code]?.name ?? code,
+    }))
+    .slice(0, 5); // Show up to 5 suggestions
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -47,8 +67,8 @@ export default async function TripsPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Мои поездки</h1>
           <p className="text-sm text-muted-foreground">
-            {trips.length > 0
-              ? `Всего поездок: ${trips.length}`
+            {(trips ?? []).length > 0
+              ? `Всего поездок: ${(trips ?? []).length}`
               : "Пока нет поездок"}
           </p>
         </div>
@@ -60,8 +80,38 @@ export default async function TripsPage() {
         </Button>
       </div>
 
+      {/* Suggestion banner for visited countries without trips */}
+      {suggestedCountries.length > 0 && (
+        <div className="rounded-xl border border-primary/20 bg-primary/5 px-4 py-3">
+          <div className="flex items-start gap-3">
+            <Sparkles className="mt-0.5 size-4 shrink-0 text-primary" />
+            <div className="min-w-0 flex-1">
+              <p className="text-sm text-foreground">
+                Вы побывали в{" "}
+                {suggestedCountries.map((c, i) => (
+                  <span key={c.code}>
+                    {i > 0 && ", "}
+                    <strong>{c.name}</strong>
+                  </span>
+                ))}
+                , но пока не рассказали детали. Может, добавим поездку?
+              </p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {suggestedCountries.map((c) => (
+                  <Button key={c.code} asChild size="xs" variant="outline">
+                    <Link href={`/trips/new?country=${c.code}`}>
+                      + {c.name}
+                    </Link>
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Trips list or empty state */}
-      {trips.length === 0 ? (
+      {(trips ?? []).length === 0 ? (
         <div className="flex flex-col items-center gap-4 rounded-xl border bg-card py-16 text-center">
           <div className="text-5xl">🗺️</div>
           <div>
@@ -78,7 +128,7 @@ export default async function TripsPage() {
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {trips.map((trip) => (
+          {(trips ?? []).map((trip) => (
             <TripCard key={trip.id} trip={trip} />
           ))}
         </div>

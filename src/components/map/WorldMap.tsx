@@ -31,8 +31,8 @@ const COLOR_HOVER = "#d1d5db";       // gray-300
 interface WorldMapProps {
   /** Set of visited country alpha-2 codes */
   visitedCountries: Set<string>;
-  /** Called when a visited country is clicked */
-  onCountryClick?: (alpha2: string) => void;
+  /** Called when any country is clicked (alpha2 code + visited flag) */
+  onCountryClick?: (alpha2: string, isVisited: boolean) => void;
 }
 
 function WorldMapInner({ visitedCountries, onCountryClick }: WorldMapProps) {
@@ -139,7 +139,7 @@ function WorldMapInner({ visitedCountries, onCountryClick }: WorldMapProps) {
                         hover: {
                           fill: isVisited ? COLOR_VISITED_HOVER : COLOR_HOVER,
                           outline: "none",
-                          cursor: isVisited ? "pointer" : "default",
+                          cursor: alpha2 ? "pointer" : "default",
                           transition: "fill 0.2s ease",
                         },
                         pressed: { outline: "none" },
@@ -153,8 +153,8 @@ function WorldMapInner({ visitedCountries, onCountryClick }: WorldMapProps) {
                       onMouseMove={handleMouseMove}
                       onMouseLeave={handleMouseLeave}
                       onClick={() => {
-                        if (isVisited && alpha2 && onCountryClick) {
-                          onCountryClick(alpha2);
+                        if (alpha2 && onCountryClick) {
+                          onCountryClick(alpha2, isVisited);
                         }
                       }}
                     />

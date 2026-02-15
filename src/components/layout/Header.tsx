@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
   Globe,
+  Globe2,
   LayoutDashboard,
   Map,
   Sparkles,
@@ -35,6 +36,7 @@ interface HeaderProps {
 const NAV_LINKS = [
   { href: "/dashboard", label: "Дашборд", icon: LayoutDashboard },
   { href: "/trips", label: "Мои поездки", icon: Map },
+  { href: "/countries", label: "Мои страны", icon: Globe2 },
   { href: "/portrait", label: "Портрет", icon: Sparkles },
 ];
 

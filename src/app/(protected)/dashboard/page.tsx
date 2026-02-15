@@ -24,18 +24,23 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [{ data: profile }, { data: trips }] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select("display_name")
-      .eq("id", user!.id)
-      .single(),
-    supabase
-      .from("trips")
-      .select("country_code, started_at")
-      .eq("user_id", user!.id)
-      .order("started_at", { ascending: true }),
-  ]);
+  const [{ data: profile }, { data: trips }, { data: visitedRows }] =
+    await Promise.all([
+      supabase
+        .from("profiles")
+        .select("display_name")
+        .eq("id", user!.id)
+        .single(),
+      supabase
+        .from("trips")
+        .select("country_code, started_at")
+        .eq("user_id", user!.id)
+        .order("started_at", { ascending: true }),
+      supabase
+        .from("visited_countries")
+        .select("country_code")
+        .eq("user_id", user!.id),
+    ]);
 
   const displayName =
     profile?.display_name ||
@@ -43,7 +48,9 @@ export default async function DashboardPage() {
     "Путешественник";
 
   const tripList = trips ?? [];
-  const visitedCodes = [...new Set(tripList.map((t) => t.country_code))];
+  const tripCodes = [...new Set(tripList.map((t) => t.country_code))];
+  const manualVisitedCodes = (visitedRows ?? []).map((r) => r.country_code);
+  const visitedCodes = [...new Set([...tripCodes, ...manualVisitedCodes])];
   const totalCountries = visitedCodes.length;
   const percentWorld =
     TOTAL_COUNTRIES > 0
@@ -137,7 +144,7 @@ export default async function DashboardPage() {
         </Card>
       )}
 
-      <DashboardClient visitedCodes={visitedCodes} />
+      <DashboardClient visitedCodes={visitedCodes} tripCodes={tripCodes} />
 
       <StatsPanel stats={stats} />
     </div>

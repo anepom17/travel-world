@@ -4,10 +4,16 @@ export const metadata = {
   title: "Новая поездка — Travel World",
 };
 
-export default function NewTripPage() {
+export default async function NewTripPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ country?: string }>;
+}) {
+  const { country } = await searchParams;
+
   return (
     <div className="mx-auto max-w-2xl">
-      <TripForm />
+      <TripForm defaultCountryCode={country} />
     </div>
   );
 }
