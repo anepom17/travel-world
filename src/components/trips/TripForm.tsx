@@ -54,14 +54,18 @@ export function TripForm({ trip }: TripFormProps) {
   const countrySearchInputRef = useRef<HTMLInputElement>(null);
 
   const filteredCountries = useMemo(() => {
-    if (!countrySearch) return COUNTRIES;
-    const q = countrySearch.toLowerCase();
-    return COUNTRIES.filter(
-      (c) =>
-        c.name.toLowerCase().includes(q) ||
-        c.nameEn.toLowerCase().includes(q) ||
-        c.code.toLowerCase() === q
-    );
+    const list = !countrySearch
+      ? [...COUNTRIES]
+      : (() => {
+          const q = countrySearch.toLowerCase();
+          return COUNTRIES.filter(
+            (c) =>
+              c.name.toLowerCase().includes(q) ||
+              c.nameEn.toLowerCase().includes(q) ||
+              c.code.toLowerCase() === q
+          );
+        })();
+    return list.sort((a, b) => a.name.localeCompare(b.name, "ru"));
   }, [countrySearch]);
 
   const selectedCountry = COUNTRIES.find(
@@ -75,23 +79,6 @@ export function TripForm({ trip }: TripFormProps) {
     }, 0);
     return () => clearTimeout(t);
   }, [countrySearch]);
-
-  // #region agent log
-  useEffect(() => {
-    const el = document.activeElement;
-    fetch("http://127.0.0.1:7243/ingest/1959ad74-ed73-43cb-8cc5-64a1ecdfdac7", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        hypothesisId: "H3",
-        location: "TripForm.tsx:countrySearch effect",
-        message: "countrySearch changed",
-        data: { countrySearchLen: countrySearch.length, activeTag: el?.tagName, activeRole: (el as HTMLElement)?.getAttribute?.("role") },
-        timestamp: Date.now(),
-      }),
-    }).catch(() => {});
-  }, [countrySearch]);
-  // #endregion
 
   // Form state
   const [mood, setMood] = useState<string>(trip?.mood ?? "");
@@ -140,72 +127,9 @@ export function TripForm({ trip }: TripFormProps) {
                 <div className="px-2 pb-2">
                   <Input
                     ref={countrySearchInputRef}
-                    data-country-search="true"
                     placeholder="Поиск страны..."
                     value={countrySearch}
-                    onChange={(e) => {
-                      setCountrySearch(e.target.value);
-                      // #region agent log
-                      fetch("http://127.0.0.1:7243/ingest/1959ad74-ed73-43cb-8cc5-64a1ecdfdac7", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                          hypothesisId: "H2",
-                          location: "TripForm.tsx:country search onChange",
-                          message: "country search onChange",
-                          data: { newLen: e.target.value.length },
-                          timestamp: Date.now(),
-                        }),
-                      }).catch(() => {});
-                      // #endregion
-                    }}
-                    onFocus={() => {
-                      // #region agent log
-                      fetch("http://127.0.0.1:7243/ingest/1959ad74-ed73-43cb-8cc5-64a1ecdfdac7", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                          hypothesisId: "H1",
-                          location: "TripForm.tsx:country search onFocus",
-                          message: "country search input focused",
-                          data: {},
-                          timestamp: Date.now(),
-                        }),
-                      }).catch(() => {});
-                      // #endregion
-                    }}
-                    onBlur={() => {
-                      // #region agent log
-                      const el = document.activeElement;
-                      fetch("http://127.0.0.1:7243/ingest/1959ad74-ed73-43cb-8cc5-64a1ecdfdac7", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                          hypothesisId: "H1",
-                          location: "TripForm.tsx:country search onBlur",
-                          message: "country search input blurred",
-                          data: { activeTag: el?.tagName, activeRole: (el as HTMLElement)?.getAttribute?.("role") },
-                          timestamp: Date.now(),
-                        }),
-                      }).catch(() => {});
-                      // #endregion
-                    }}
-                    onKeyDown={(e) => {
-                      // #region agent log
-                      const targetIsInput = (e.target as HTMLElement)?.getAttribute?.("data-country-search") === "true";
-                      fetch("http://127.0.0.1:7243/ingest/1959ad74-ed73-43cb-8cc5-64a1ecdfdac7", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                          hypothesisId: "H2",
-                          location: "TripForm.tsx:country search onKeyDown",
-                          message: "keydown in country area",
-                          data: { key: e.key, targetIsInput },
-                          timestamp: Date.now(),
-                        }),
-                      }).catch(() => {});
-                      // #endregion
-                    }}
+                    onChange={(e) => setCountrySearch(e.target.value)}
                     className="h-8"
                     autoFocus
                   />
