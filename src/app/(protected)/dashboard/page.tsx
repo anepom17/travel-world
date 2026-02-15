@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
 export const metadata = {
-  title: "Дашборд — Travel World",
+  title: "Моя карта — Travel World",
 };
 
 export default async function DashboardPage() {
@@ -119,7 +119,7 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Дашборд</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Моя карта</h1>
         <p className="text-muted-foreground">
           Добро пожаловать, {displayName}!
         </p>
@@ -144,7 +144,12 @@ export default async function DashboardPage() {
         </Card>
       )}
 
-      <DashboardClient visitedCodes={visitedCodes} tripCodes={tripCodes} />
+      <DashboardClient
+        visitedCodes={visitedCodes}
+        tripCodes={tripCodes}
+        stats={stats}
+        displayName={displayName}
+      />
 
       <StatsPanel stats={stats} />
     </div>

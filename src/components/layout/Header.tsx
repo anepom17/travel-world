@@ -34,7 +34,7 @@ interface HeaderProps {
 }
 
 const NAV_LINKS = [
-  { href: "/dashboard", label: "Дашборд", icon: LayoutDashboard },
+  { href: "/dashboard", label: "Моя карта", icon: LayoutDashboard },
   { href: "/trips", label: "Мои поездки", icon: Map },
   { href: "/countries", label: "Мои страны", icon: Globe2 },
   { href: "/portrait", label: "Портрет", icon: Sparkles },

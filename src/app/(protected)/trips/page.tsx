@@ -31,6 +31,42 @@ export default async function TripsPage() {
       .eq("user_id", user!.id),
   ]);
 
+  // Thumbnails for trip cards: first 6 photos per trip with signed URLs
+  const tripIds = (trips ?? []).map((t) => t.id);
+  const thumbnailsByTripId: Record<string, string[]> = {};
+  if (tripIds.length > 0) {
+    const { data: photos } = await supabase
+      .from("photos")
+      .select("id, trip_id, storage_path, sort_order, created_at")
+      .in("trip_id", tripIds)
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: true });
+
+    const byTrip = new Map<string, { storage_path: string }[]>();
+    for (const p of photos ?? []) {
+      const list = byTrip.get(p.trip_id) ?? [];
+      if (list.length < 6) list.push({ storage_path: p.storage_path });
+      byTrip.set(p.trip_id, list);
+    }
+
+    const signedExpiry = 60 * 60;
+    const allPaths = Array.from(byTrip.values()).flat();
+    const signed = await Promise.all(
+      allPaths.map(({ storage_path }) =>
+        supabase.storage
+          .from("trip-photos")
+          .createSignedUrl(storage_path, signedExpiry)
+      )
+    );
+
+    let idx = 0;
+    for (const [tid, list] of byTrip) {
+      thumbnailsByTripId[tid] = list
+        .map(() => signed[idx++]?.data?.signedUrl ?? "")
+        .filter(Boolean);
+    }
+  }
+
   if (error) {
     return (
       <div className="flex flex-col items-center gap-4 rounded-xl border border-destructive/20 bg-destructive/5 py-16 text-center">
@@ -129,7 +165,11 @@ export default async function TripsPage() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {(trips ?? []).map((trip) => (
-            <TripCard key={trip.id} trip={trip} />
+            <TripCard
+              key={trip.id}
+              trip={trip}
+              thumbnails={thumbnailsByTripId[trip.id] ?? []}
+            />
           ))}
         </div>
       )}

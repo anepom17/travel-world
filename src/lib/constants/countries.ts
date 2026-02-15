@@ -226,6 +226,18 @@ export const CONTINENT_LABELS: Record<string, string> = {
   Oceania: "Океания",
 };
 
+/** Map tooltip: TopoJSON English names for territories → Russian (not in COUNTRIES) */
+export const GEO_NAME_TO_RU: Record<string, string> = {
+  "Greenland": "Гренландия",
+  "N. Cyprus": "Северный Кипр",
+  "S. Sudan": "Южный Судан",
+  "Fr. S. Antarctic Lands": "Французские Южные территории",
+  "Falkland Is.": "Фолклендские острова",
+  "Br. Indian Ocean Ter.": "Британская территория в Индийском океане",
+  "W. Sahara": "Западная Сахара",
+  "Antarctica": "Антарктида",
+};
+
 /** Map region: world view or a single continent */
 export type MapRegion = "World" | Continent;
 

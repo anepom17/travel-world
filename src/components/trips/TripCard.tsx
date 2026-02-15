@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { MapPin, Calendar, ArrowRight } from "lucide-react";
+import Image from "next/image";
+import { MapPin, Calendar, ArrowRight, Images } from "lucide-react";
 
 import type { Trip } from "@/types";
 import { Badge } from "@/components/ui/badge";
@@ -28,12 +29,42 @@ function formatDate(dateStr: string) {
 
 interface TripCardProps {
   trip: Trip;
+  /** First few photo URLs for thumbnail strip (up to 6) */
+  thumbnails?: string[];
 }
 
-export function TripCard({ trip }: TripCardProps) {
+export function TripCard({ trip, thumbnails = [] }: TripCardProps) {
+  const hasThumbnails = thumbnails.length > 0;
+
   return (
     <Link href={`/trips/${trip.id}`} className="group block">
-      <Card className="transition-all duration-200 hover:shadow-md hover:shadow-primary/5">
+      <Card className="overflow-hidden transition-all duration-200 hover:shadow-md hover:shadow-primary/5">
+        {/* Thumbnail strip: small album preview */}
+        {hasThumbnails ? (
+          <div className="flex aspect-[16/6] w-full gap-0.5 bg-muted/30 p-1.5">
+            {thumbnails.slice(0, 6).map((url, i) => (
+              <div
+                key={`${trip.id}-${i}`}
+                className="relative flex-1 overflow-hidden rounded-sm bg-muted"
+              >
+                <Image
+                  src={url}
+                  alt=""
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 640px) 80px, 120px"
+                />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="flex aspect-[16/6] w-full items-center justify-center gap-1 bg-muted/20 px-2">
+            <Images className="size-6 text-muted-foreground/50" />
+            <span className="text-xs text-muted-foreground/70">
+              Нет фото в альбоме
+            </span>
+          </div>
+        )}
         <CardHeader className="pb-2">
           <div className="flex items-start justify-between gap-2">
             <CardTitle className="text-base leading-tight">
