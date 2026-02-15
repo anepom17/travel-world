@@ -16,17 +16,34 @@ const SECTION_LABELS: Record<string, string> = {
   recommendation: "Рекомендация",
 };
 
+function formatAvailableDate(iso: string): string {
+  const d = new Date(iso);
+  return d.toLocaleDateString("ru-RU", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+}
+
 interface PortraitClientProps {
   tripsCount: number;
   initialPortrait: Portrait | null;
+  nextAvailableAt: string | null;
 }
 
 export function PortraitClient({
   tripsCount,
   initialPortrait,
+  nextAvailableAt: initialNextAvailableAt,
 }: PortraitClientProps) {
   const [portrait, setPortrait] = useState<Portrait | null>(initialPortrait);
   const [isLoading, setIsLoading] = useState(false);
+  const [nextAvailableAt, setNextAvailableAt] = useState<string | null>(
+    initialNextAvailableAt
+  );
+
+  const canGenerate =
+    nextAvailableAt === null || new Date() >= new Date(nextAvailableAt);
 
   async function handleGenerate() {
     setIsLoading(true);
@@ -35,11 +52,20 @@ export function PortraitClient({
       const data = await res.json();
 
       if (!res.ok) {
-        toast.error(data.error ?? "Ошибка генерации");
+        if (res.status === 429 && data.nextAvailableAt) {
+          setNextAvailableAt(data.nextAvailableAt);
+          const msg =
+            data.error ??
+            `Следующая генерация возможна с ${formatAvailableDate(data.nextAvailableAt)}`;
+          toast.error(msg);
+        } else {
+          toast.error(data.error ?? "Ошибка генерации");
+        }
         return;
       }
 
       setPortrait(data.portrait);
+      setNextAvailableAt(null);
       toast.success("Портрет готов!");
     } catch {
       toast.error("Не удалось сгенерировать портрет");
@@ -77,34 +103,42 @@ export function PortraitClient({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-muted-foreground">
           {portrait
             ? "ИИ-портрет на основе ваших поездок"
             : "Сгенерируйте персональный портрет путешественника"}
         </p>
-        <Button
-          onClick={handleGenerate}
-          disabled={isLoading}
-          className="gap-2"
-        >
-          {isLoading ? (
-            <>
-              <Loader2 className="size-4 animate-spin" />
-              Генерация...
-            </>
-          ) : portrait ? (
-            <>
-              <Sparkles className="size-4" />
-              Обновить портрет
-            </>
-          ) : (
-            <>
-              <Sparkles className="size-4" />
-              Сгенерировать портрет
-            </>
+        <div className="flex flex-col gap-1.5 sm:items-end">
+          {!canGenerate && nextAvailableAt && (
+            <p className="text-sm text-muted-foreground">
+              Следующая генерация возможна с{" "}
+              {formatAvailableDate(nextAvailableAt)}
+            </p>
           )}
-        </Button>
+          <Button
+            onClick={handleGenerate}
+            disabled={isLoading || !canGenerate}
+            className="gap-2"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="size-4 animate-spin" />
+                Генерация...
+              </>
+            ) : portrait ? (
+              <>
+                <Sparkles className="size-4" />
+                Обновить портрет
+              </>
+            ) : (
+              <>
+                <Sparkles className="size-4" />
+                Сгенерировать портрет
+              </>
+            )}
+          </Button>
+        </div>
       </div>
 
       {portrait && (

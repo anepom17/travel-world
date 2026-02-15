@@ -20,15 +20,18 @@ export default async function PortraitPage() {
       .eq("user_id", user!.id),
     supabase
       .from("ai_portraits")
-      .select("content")
+      .select("content, generated_at")
       .eq("user_id", user!.id)
       .order("generated_at", { ascending: false })
       .limit(1)
       .maybeSingle(),
   ]);
 
+  const PORTRAIT_COOLDOWN_DAYS = 3;
   const tripsTotal = tripsCount ?? 0;
   let cachedPortrait: Portrait | null = null;
+  let nextAvailableAt: string | null = null;
+
   if (latestPortrait?.content) {
     try {
       cachedPortrait = parsePortrait(latestPortrait.content);
@@ -40,6 +43,14 @@ export default async function PortraitPage() {
         recommendation: "",
         raw: latestPortrait.content,
       };
+    }
+    if (latestPortrait.generated_at) {
+      const lastAt = new Date(latestPortrait.generated_at);
+      const next = new Date(lastAt);
+      next.setDate(next.getDate() + PORTRAIT_COOLDOWN_DAYS);
+      if (new Date() < next) {
+        nextAvailableAt = next.toISOString();
+      }
     }
   }
 
@@ -55,6 +66,7 @@ export default async function PortraitPage() {
       <PortraitClient
         tripsCount={tripsTotal}
         initialPortrait={cachedPortrait}
+        nextAvailableAt={nextAvailableAt}
       />
     </div>
   );

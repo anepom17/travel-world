@@ -6,6 +6,7 @@ import { parsePortrait } from "@/lib/ai/parse-portrait";
 import type { Trip } from "@/types";
 
 const MIN_TRIPS = 3;
+const PORTRAIT_COOLDOWN_DAYS = 3;
 
 export async function POST() {
   const supabase = await createClient();
@@ -30,6 +31,30 @@ export async function POST() {
       { error: "Add at least 3 trips to generate your traveler portrait" },
       { status: 400 }
     );
+  }
+
+  const { data: lastPortrait } = await supabase
+    .from("ai_portraits")
+    .select("generated_at")
+    .eq("user_id", user.id)
+    .order("generated_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (lastPortrait?.generated_at) {
+    const lastAt = new Date(lastPortrait.generated_at);
+    const nextAvailableAt = new Date(lastAt);
+    nextAvailableAt.setDate(nextAvailableAt.getDate() + PORTRAIT_COOLDOWN_DAYS);
+    if (new Date() < nextAvailableAt) {
+      return NextResponse.json(
+        {
+          error:
+            "Следующая генерация возможна не ранее чем через 3 дня после последней.",
+          nextAvailableAt: nextAvailableAt.toISOString(),
+        },
+        { status: 429 }
+      );
+    }
   }
 
   const systemPrompt = PORTRAIT_SYSTEM_PROMPT;
