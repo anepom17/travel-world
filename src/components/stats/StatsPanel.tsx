@@ -2,7 +2,7 @@ import { Globe, MapPin, Calendar, Plane } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { CONTINENT_LABELS } from "@/lib/constants/countries";
+import { CONTINENT_LABELS, TOTAL_COUNTRIES } from "@/lib/constants/countries";
 
 export interface ContinentStat {
   name: string;
@@ -52,7 +52,7 @@ export function StatsPanel({ stats }: { stats: DashboardStats }) {
         <CardContent>
           <div className="text-2xl font-bold">{totalCountries}</div>
           <p className="text-xs text-muted-foreground">
-            {percentWorld.toFixed(1)}% мира (из 195)
+            {percentWorld.toFixed(1)}% мира (из {TOTAL_COUNTRIES})
           </p>
         </CardContent>
       </Card>

@@ -81,7 +81,7 @@ export const NUMERIC_TO_ALPHA2: Record<string, string> = {
   "266": "GA", // Gabon
   "268": "GE", // Georgia
   "270": "GM", // Gambia
-  "275": "PS", // Palestine
+  "275": "IL", // (territory shown as Israel on map)
   "276": "DE", // Germany
   "288": "GH", // Ghana
   "296": "KI", // Kiribati

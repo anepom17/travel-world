@@ -138,7 +138,6 @@ export const COUNTRIES: Country[] = [
   { code: "OM", name: "Оман", nameEn: "Oman", continent: "Asia" },
   { code: "PK", name: "Пакистан", nameEn: "Pakistan", continent: "Asia" },
   { code: "PW", name: "Палау", nameEn: "Palau", continent: "Oceania" },
-  { code: "PS", name: "Палестина", nameEn: "Palestine", continent: "Asia" },
   { code: "PA", name: "Панама", nameEn: "Panama", continent: "North America" },
   { code: "PG", name: "Папуа — Новая Гвинея", nameEn: "Papua New Guinea", continent: "Oceania" },
   { code: "PY", name: "Парагвай", nameEn: "Paraguay", continent: "South America" },
@@ -203,8 +202,8 @@ export const COUNTRIES: Country[] = [
   { code: "XK", name: "Косово", nameEn: "Kosovo", continent: "Europe" },
 ];
 
-/** Total UN-recognized sovereign states */
-export const TOTAL_COUNTRIES = 195;
+/** Total countries in the list (used for stats) */
+export const TOTAL_COUNTRIES = 194;
 
 export const CONTINENTS = [
   "Africa",
