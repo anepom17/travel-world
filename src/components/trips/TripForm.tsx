@@ -68,6 +68,14 @@ export function TripForm({ trip }: TripFormProps) {
     (c) => c.code === selectedCountryCode
   );
 
+  // Restore focus to search input when list updates (Radix steals focus otherwise)
+  useEffect(() => {
+    const t = setTimeout(() => {
+      countrySearchInputRef.current?.focus();
+    }, 0);
+    return () => clearTimeout(t);
+  }, [countrySearch]);
+
   // #region agent log
   useEffect(() => {
     const el = document.activeElement;
@@ -128,7 +136,7 @@ export function TripForm({ trip }: TripFormProps) {
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Выберите страну" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent position="popper">
                 <div className="px-2 pb-2">
                   <Input
                     ref={countrySearchInputRef}
