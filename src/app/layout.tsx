@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
+import { ServiceWorkerRegistration } from "@/components/pwa/ServiceWorkerRegistration";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -17,6 +18,16 @@ export const metadata: Metadata = {
   title: "Travel World — Дневник путешествий",
   description:
     "Персональный дневник путешествий с интерактивной картой мира, фотоальбомами и ИИ-портретом путешественника.",
+  manifest: "/manifest.json",
+  themeColor: "#0D9488",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Travel World",
+  },
+  icons: {
+    apple: "/icons/icon-192x192.png",
+  },
 };
 
 export default function RootLayout({
@@ -31,6 +42,7 @@ export default function RootLayout({
       >
         {children}
         <Toaster richColors closeButton position="top-right" />
+        <ServiceWorkerRegistration />
       </body>
     </html>
   );
