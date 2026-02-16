@@ -132,6 +132,7 @@ export function TripForm({ trip, defaultCountryCode }: TripFormProps) {
                     placeholder="Поиск страны..."
                     value={countrySearch}
                     onChange={(e) => setCountrySearch(e.target.value)}
+                    onKeyDown={(e) => e.stopPropagation()}
                     className="h-8"
                     autoFocus
                   />
