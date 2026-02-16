@@ -85,21 +85,33 @@ export function PhotoUploader({
       setIsUploading(true);
       try {
         const compressed = await compressFiles(files);
-        const formData = new FormData();
-        compressed.forEach((file) => formData.append("files", file));
-        const result = await uploadTripPhotos(tripId, formData);
-        if (result.error) {
-          toast.error("Ошибка загрузки", { description: result.error });
-          return;
+        let uploaded = 0;
+        let lastError: string | undefined;
+        for (const file of compressed) {
+          const formData = new FormData();
+          formData.append("files", file);
+          const result = await uploadTripPhotos(tripId, formData);
+          if (result.error) {
+            lastError = result.error;
+            toast.error("Ошибка загрузки", { description: result.error });
+            break;
+          }
+          uploaded += 1;
         }
-        toast.success("Фото добавлены");
-        router.refresh();
-        onSuccess?.();
+        if (uploaded > 0) {
+          toast.success(uploaded === files.length ? "Фото добавлены" : `Добавлено ${uploaded} из ${files.length}`);
+          router.refresh();
+          onSuccess?.();
+        }
       } catch (err) {
-        toast.error(
-          "Ошибка",
-          { description: err instanceof Error ? err.message : "Сжатие или загрузка не удались" }
-        );
+        const message = err instanceof Error ? err.message : "Сжатие или загрузка не удались";
+        if (String(message).includes("unexpected response") || String(message).includes("fetch")) {
+          toast.error("Ошибка", {
+            description: "Сервер не ответил. Попробуйте загружать по одному фото или проверьте интернет.",
+          });
+        } else {
+          toast.error("Ошибка", { description: message });
+        }
       } finally {
         setIsUploading(false);
       }
